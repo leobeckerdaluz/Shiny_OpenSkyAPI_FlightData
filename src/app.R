@@ -1,7 +1,8 @@
 if (!require('shiny')) install.packages('shiny')
-if (!require('rgl')) install.packages('rgl')
-if (!require('car')) install.packages('car')
-if (!require('DT')) install.packages('DT')
+if (!require('leaflet')) install.packages('leaflet')
+if (!require('magrittr')) install.packages('magrittr')
+library(leaflet)
+library(magrittr)
 library(shiny)
 
 ## GET FILES ##
@@ -44,14 +45,13 @@ ui <- fluidPage(
 ## SERVER ##
 server <- function(input, output) {
   output$mymap <- renderLeaflet({
-    file <- paste(input$ICAO24, "/sub_", input$sub_folder, ".csv", sep="")
-    motion_part <- read.csv2(file, header = TRUE, 
-                             sep = ",", stringsAsFactors = FALSE)
+    #file <- paste(input$ICAO24, "/sub_", input$sub_folder, ".csv", sep="")
+    #motion_part <- read.csv2(file, header = TRUE, 
+    #                         sep = ",", stringsAsFactors = FALSE)
     
     #=================================================================================
     # GET CSV
-    library(leaflet)
-    library(magrittr)
+    
     
     csv_file_path = "../voo.csv"
     csv_data <- read.csv(csv_file_path)
