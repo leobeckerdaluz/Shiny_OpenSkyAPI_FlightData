@@ -78,11 +78,11 @@ server <- function(input, output) {
       #             lng = ~LONGITUDE, 
       #             lat = ~LATITUDE, 
       #             group = ~TIMESTAMP)
-      #addMarkers(data = csv_data[1,], 
-      #           icon = list(
-      #             iconUrl = 'http://www.iconarchive.com/download/i91814/icons8/windows-8/Transport-Airplane-Mode-On.ico',
-      #             iconSize = c(20, 20)
-      #           )) %>%
+      addMarkers(data = csv_data[1,], 
+                icon = list(
+                  iconUrl = 'http://www.iconarchive.com/download/i91814/icons8/windows-8/Transport-Airplane-Mode-On.ico',
+                  iconSize = c(20, 20)
+                )) %>%
       addCircleMarkers( data = csv_data, 
                         lng = ~LONGITUDE, 
                         lat = ~LATITUDE, 
