@@ -1,9 +1,13 @@
 if (!require('shiny')) install.packages('shiny')
-if (!require('leaflet')) install.packages('leaflet')
-if (!require('magrittr')) install.packages('magrittr')
-library(leaflet)
-library(magrittr)
 library(shiny)
+if (!require('leaflet')) install.packages('leaflet')
+library(leaflet)
+if (!require('magrittr')) install.packages('magrittr')
+library(magrittr)
+# if (!require('httr')) install.packages('httr')
+# require("httr")
+# if (!require('jsonlite')) install.packages('jsonlite')
+# require("jsonlite")
 
 ## GET FILES ##
 # Get all filepaths
@@ -56,6 +60,10 @@ server <- function(input, output) {
     csv_file_path = "../voo.csv"
     csv_data <- read.csv(csv_file_path)
     csv_data
+
+    states_file_path = "../states.csv"
+    states_data <- read.csv(states_file_path)
+    states_data
     
     #pal <- colorFactor(palette = c("blue", "red", "green"),
     #              levels = c("Public", "Private", "For-Profit"))
@@ -78,11 +86,16 @@ server <- function(input, output) {
       #             lng = ~LONGITUDE, 
       #             lat = ~LATITUDE, 
       #             group = ~TIMESTAMP)
-      addMarkers(data = csv_data[1,], 
-                icon = list(
-                  iconUrl = 'http://www.iconarchive.com/download/i91814/icons8/windows-8/Transport-Airplane-Mode-On.ico',
-                  iconSize = c(20, 20)
-                )) %>%
+      # addMarkers( data = csv_data[1,], 
+      #             icon = list(
+      #               iconUrl = 'http://www.iconarchive.com/download/i91814/icons8/windows-8/Transport-Airplane-Mode-On.ico',
+      #               iconSize = c(20, 20)
+      #             )) %>%
+      addMarkers( data = states_data, 
+                  icon = list(
+                    iconUrl = 'http://www.iconarchive.com/download/i91814/icons8/windows-8/Transport-Airplane-Mode-On.ico',
+                    iconSize = c(20, 20)
+                  )) %>%
       addCircleMarkers( data = csv_data, 
                         lng = ~LONGITUDE, 
                         lat = ~LATITUDE, 
