@@ -22,7 +22,7 @@ function timestamp_to_date(timestamp){
 // 1 Function Response Request
 var get_response = function (error, response, body){
     if (!error && response.statusCode === 200) {
-        var first = body[6]
+        var first = body[12]
         
         console.log("Selecionando o primeiro:\n")
         
@@ -117,12 +117,29 @@ past_date_timestamp = past.getTime()
 var url = "https://opensky-network.org/api/flights/arrival?airport="+airportICAO+"&begin=1559001600&end=1559433600"
 // var url = "https://opensky-network.org/api/flights/arrival?airport="+airportICAO+"&begin="+past_date_timestamp.toString()+"&end="+now_date_timestamp.toString()
 
-// 1 Request
-request({
-    url: url,
-    json: true
-}, get_response)
+// // 1 Request
+// request({
+//     url: url,
+//     json: true
+// }, get_response)
 
+
+var icao24 = "e4936a"
+// var icao24 = "e4904c"
+// var icao24 = "e48ac5"
+
+
+var url2 = "https://"+credentials.API_user+":"+credentials.API_password+"@opensky-network.org/api/tracks/all?icao24="+icao24+"&time=0"
+// console.log("--------------------------------------------------------------------------------------------------")
+// console.log("\nConsultando voo com o icao24=" + first.icao24 + " a partir da url: ")
+// console.log("\t" + url2)
+// console.log("--------------------------------------------------------------------------------------------------")
+
+// 2 Request
+request({
+    url: url2,
+    json: true
+}, get_response2)
 
 
  

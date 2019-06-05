@@ -4,10 +4,10 @@ if (!require('leaflet')) install.packages('leaflet')
 library(leaflet)
 if (!require('magrittr')) install.packages('magrittr')
 library(magrittr)
-# if (!require('httr')) install.packages('httr')
-# require("httr")
-# if (!require('jsonlite')) install.packages('jsonlite')
-# require("jsonlite")
+if (!require('httr')) install.packages('httr')
+require("httr")
+if (!require('jsonlite')) install.packages('jsonlite')
+require("jsonlite")
 
 ## GET FILES ##
 # Get all filepaths
@@ -18,6 +18,7 @@ diretorios <- c("calsign1", "calsign2", "calsign3", "calsign4", "calsign5")
 # # Nomeia a lista de diretórios
 #names(diretorios) <- folder_names
 
+ICAO24_list = c("e4936a", "e4904c", "e48ac5")
 
 ## UI ##
 ui <- fluidPage(
@@ -26,10 +27,11 @@ ui <- fluidPage(
   sidebarLayout(
     sidebarPanel(
       selectInput("ICAO24",
-                  "Lista de Voos",
-                  choices = c(diretorios),
-                  selected=diretorios[1]
+                  "Lista de ICAOs",
+                  choices = c(ICAO24_list),
+                  selected=ICAO24_list[1]
       ),
+
       selectInput("sub_folder",
                   "Lista de sub_folder",
                   choices = 1:24,
@@ -40,7 +42,7 @@ ui <- fluidPage(
     
     mainPanel(
       #plotOutput("distPlot")
-      leafletOutput("mymap",height = 1000)
+      leafletOutput("mymap",height = 500)
     )
   )
 )
@@ -55,7 +57,7 @@ server <- function(input, output) {
     
     #=================================================================================
     # GET CSV
-    
+    teste <- input$ICAO24
     
     csv_file_path = "../voo.csv"
     csv_data <- read.csv(csv_file_path)
@@ -73,15 +75,28 @@ server <- function(input, output) {
     first_lat = csv_data[1,]$LATITUDE
     first_lng = csv_data[1,]$LONGITUDE
     
+    # -------------------------- GET --------------------------
+    url1 <- paste("https://leobeckerdaluz:caio123456@opensky-network.org/api/tracks/all?icao24=", teste, "&time=0", sep = "")
+    # url1 = "https://leobeckerdaluz:caio123456@opensky-network.org/api/tracks/all?icao24=e4936a&time=0"
+    # url1 <- "https://opensky-network.org/api/states/all"
+    get_prices <- GET(url1)
+    get_prices_text <- content(get_prices, "text")
+    get_prices_json <- fromJSON(get_prices_text, flatten = TRUE)
+    get_prices_df <- as.data.frame(get_prices_json)
+    icao24 <- get_prices_df[1,]$icao24
+    path_df <- as.data.frame(get_prices_json$path)
+    names(path_df) <- c("TIMESTAMP", "LATITUDE", "LONGITUDE", "COLOR", "ANGLE", "on_ground")
+    # ------------------------ END GET ------------------------
+
     m <- leaflet() %>%
       addTiles() %>%
       setView(lng=first_lng, 
               lat=first_lat , 
-              zoom=10) %>%
-      addPolylines(data = csv_data, 
-                   lng = ~LONGITUDE, 
-                   lat = ~LATITUDE, 
-                   color = "green") %>%
+              zoom=7) %>%
+      # addPolylines(data = csv_data, 
+      #              lng = ~LONGITUDE, 
+      #              lat = ~LATITUDE, 
+      #              color = "green") %>%
       #addMarkers(data = csv_data, 
       #             lng = ~LONGITUDE, 
       #             lat = ~LATITUDE, 
@@ -90,13 +105,15 @@ server <- function(input, output) {
       #             icon = list(
       #               iconUrl = 'http://www.iconarchive.com/download/i91814/icons8/windows-8/Transport-Airplane-Mode-On.ico',
       #               iconSize = c(20, 20)
+      #             ),
+      #             popup = "caiosamu"
+      # ) %>%
+      # addMarkers( data = states_data, 
+      #             icon = list(
+      #               iconUrl = 'http://www.iconarchive.com/download/i91814/icons8/windows-8/Transport-Airplane-Mode-On.ico',
+      #               iconSize = c(20, 20)
       #             )) %>%
-      addMarkers( data = states_data, 
-                  icon = list(
-                    iconUrl = 'http://www.iconarchive.com/download/i91814/icons8/windows-8/Transport-Airplane-Mode-On.ico',
-                    iconSize = c(20, 20)
-                  )) %>%
-      addCircleMarkers( data = csv_data, 
+      addCircleMarkers( data = path_df, 
                         lng = ~LONGITUDE, 
                         lat = ~LATITUDE, 
                         radius = 2,
