@@ -1,3 +1,8 @@
+if (!require('shiny')) install.packages('shiny')
+library(shiny)
+if (!require('leaflet')) install.packages('leaflet')
+library(leaflet)
+
 ## UI ##
 ui <- fluidPage(
     titlePanel("Voos!"),
@@ -6,9 +11,8 @@ ui <- fluidPage(
         sidebarPanel(
             selectInput("ICAO24",
                         "Lista de ICAOs",
-                        # choices = c(ICAO24_list),
-                        choices = c(1,2,3,4,5),
-                        selected = 1
+                        choices = c(ICAO24_list),
+                        selected = ICAO24_list[1]
             ),
 
             selectInput("sub_folder",

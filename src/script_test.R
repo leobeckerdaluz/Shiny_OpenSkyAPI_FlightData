@@ -1,3 +1,6 @@
+# ==============================================================================
+# ===================== TRANSFORMA TIPO DE DADO DE COLUNAS =====================
+# ==============================================================================
 if (!require('httr')) install.packages('httr')
 require("httr")
 if (!require('jsonlite')) install.packages('jsonlite')
@@ -43,3 +46,19 @@ for (row in 1:50) {
     print(paste("Classe Latitude: ", class(df$LATITUDE)))
     print(paste("Classe Longitude: ", class(df$LONGITUDE)))
 }
+
+
+# ==============================================================================
+# ====================== ENCONTRAR UM OBJETO NO DATAFRAME ======================
+# ==============================================================================
+arr <- 1:10
+employee <- c('John Doe','Peter Gynn','Jolie Hope')
+salary <- c(21000, 23400, 26800)
+startdate <- as.Date(c('2010-11-1','2008-3-25','2007-3-14'))
+employ <- data.frame(employee, salary, startdate)
+
+print(employ[1,]$salary)
+teste <- which(employ$employee == "Peter Gynn")
+if(!is.null(teste))
+   print(employ[teste,])
+# print(df)
