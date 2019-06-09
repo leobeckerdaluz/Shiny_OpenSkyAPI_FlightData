@@ -61,15 +61,15 @@ server <- function(input, output, session) {
         # Faz uma atualização dos dados de voos atuais
         current_status <<- get_current_status()
 
-        first_lat = csv_data[1,]$LATITUDE
-        first_lng = csv_data[1,]$LONGITUDE
+        # first_lat = csv_data[1,]$LATITUDE
+        # first_lng = csv_data[1,]$LONGITUDE
        
         leaflet()%>%
         addTiles() %>%
-        setView(lng=first_lng, 
-                lat=first_lat, 
-                zoom=6
-        ) %>%
+        # setView(lng=first_lng, 
+                # lat=first_lat, 
+                # zoom=6
+        # ) %>%
         
         # addPolylines(data = csv_data, 
         #              lng = ~LONGITUDE, 

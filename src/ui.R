@@ -9,17 +9,17 @@ ui <- fluidPage(
 
     sidebarLayout(
         sidebarPanel(
-            selectInput("ICAO24",
-                        "Lista de ICAOs",
-                        choices = c(ICAO24_list),
-                        selected = ICAO24_list[1]
-            ),
+            # selectInput("ICAO24",
+            #             "Lista de ICAOs",
+            #             choices = c(ICAO24_list),
+            #             selected = ICAO24_list[1]
+            # ),
 
-            selectInput("sub_folder",
-                        "Lista de sub_folder",
-                        choices = 1:24,
-                        selected = 1
-            )
+            # selectInput("sub_folder",
+            #             "Lista de sub_folder",
+            #             choices = 1:24,
+            #             selected = 1
+            # )
         ),
         mainPanel(
             #plotOutput("distPlot")
