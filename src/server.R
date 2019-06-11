@@ -103,43 +103,44 @@ get_current_status <- function() {
     print(paste("oeste: ", oeste1sudoeste2, " até ", noroeste1oeste2))
     print(paste("noroeste: ", noroeste1oeste2, " até ", norte1noroeste2))
 
+    filespath <- "images/"
     # Processa o valor de TRUE_TRACK e seta o ícone
     result <- sapply(get_states_df$true_track, function(x) { 
         if ((x >= norte1noroeste2 && x <= 360) || (x >= 0 && x < nordeste1norte2)){
             # print(paste(x," é norte!"))
-            x <- "norte.png"
+            x <- paste(filespath, "norte.png", sep="")
         }
         else if (x >= nordeste1norte2 && x < leste1nordeste2){
             # print(paste(x," é nordeste!"))
-            x <- "nordeste.png"
+            x <- paste(filespath, "nordeste.png", sep="")
         }
         else if (x >= leste1nordeste2 && x < sudeste1leste2){
             # print(paste(x," é leste!"))
-            x <- "leste.png"
+            x <- paste(filespath, "leste.png", sep="")
         }
         else if (x >= sudeste1leste2 && x < sul1sudeste2){
             # print(paste(x," é sudeste!"))
-            x <- "sudeste.png"
+            x <- paste(filespath, "sudeste.png", sep="")
         }
         else if (x >= sul1sudeste2 && x < sudoeste1sul2){
             # print(paste(x," é sul!"))
-            x <- "sul.png"
+            x <- paste(filespath, "sul.png", sep="")
         }
         else if (x >= sudoeste1sul2 && x < oeste1sudoeste2){
             # print(paste(x," é sudoeste!"))
-            x <- "sudoeste.png"
+            x <- paste(filespath, "sudoeste.png", sep="")
         }
         else if (x >= oeste1sudoeste2 && x < noroeste1oeste2){
             # print(paste(x," é oeste!"))
-            x <- "oeste.png"
+            x <- paste(filespath, "oeste.png", sep="")
         }
         else if (x >= noroeste1oeste2 && x < norte1noroeste2){
             # print(paste(x," é noroeste!"))
-            x <- "noroeste.png"
+            x <- paste(filespath, "noroeste.png", sep="")
         }
         else{
             print(paste(x," deu creps!"))
-            x <- "oeste.png"
+            x <- paste(filespath, "oeste.png", sep="")
         }
     })
     #===================================================
@@ -297,7 +298,6 @@ server <- function(input, output, session) {
         # source("credentials.R")
         # # print(api_user)
         # # url1 <- paste("https://",api_user,":",api_password,"@opensky-network.org/api/tracks/all?icao24=", teste, "&time=0", sep = "")
-        url1 <- "https://leobeckerdaluz:caio123456@opensky-network.org/api/tracks/all?icao24=e4936a&time=0"
         # # print(url1)
         # get_prices <- GET(url1)
         # get_prices_text <- content(get_prices, "text")
