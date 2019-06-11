@@ -31,38 +31,144 @@ get_current_status <- function() {
     get_states_df = get_states_df[!is.na(get_states_df$LATITUDE),]
     ### get_states_df <- get_states_df[complete.cases(get_states_df[ , 6:7]),]
     get_states_df = get_states_df[!is.na(get_states_df$LONGITUDE),]
+    get_states_df = get_states_df[!is.na(get_states_df$true_track),]
     # Converte as colunas e Longitude e Latitude de factor pra numérico com o sub por ser decimal
     get_states_df <- transform(get_states_df, 
                     LONGITUDE = as.numeric(as.character(sub("," , ".", get_states_df$LONGITUDE))), 
-                    LATITUDE = as.numeric(as.character(sub("," , ".", get_states_df$LATITUDE))))
+                    LATITUDE = as.numeric(as.character(sub("," , ".", get_states_df$LATITUDE))),
+                    true_track = as.numeric(as.character(sub("," , ".", get_states_df$true_track))))
 
-    # df <- get_states_df
-    # for (row in 1:50) { 
-    #     if (is.na(df$LATITUDE[row]) | is.na(df$LONGITUDE[row])) {
-    #     print(paste("latitude: ", row, " - ", df$LATITUDE[row], " / ", df$LONGITUDE[row], sep=""))
-    #     }
-    #     if (!is.numeric(df$LATITUDE[row]) | !is.numeric(df$LONGITUDE[row])) {
-    #     print(paste("Não é numerico: ", row, " - ", df$LATITUDE[row], " / ", df$LONGITUDE[row], sep=""))
-    #     }
-    #     if (is.numeric(df$LATITUDE[row]) | is.numeric(df$LONGITUDE[row])) {
-    #     print(paste("É numerico: ", row, " - ", df$LATITUDE[row], " / ", df$LONGITUDE[row], sep=""))
-    #     }
-    #     print(paste("Classe Latitude: ", class(df$LATITUDE)))
-    #     print(paste("Classe Longitude: ", class(df$LONGITUDE)))
-    # }
+    # Cria a coluna de ícones com valor teste
+    get_states_df$icon <- "testeICON"
 
-    return (get_states_df)
+    # print("")
+    # print("STATES antes: ")
+    # print(get_states_df[1:5,])
+
+    #===================================================
+    # # Define as coordenadas a cada 90º
+    # diff <- 90
+    # norte2leste1 <- diff/2 
+    # leste2sul1 <- norte2leste1+diff
+    # sul2oeste1 <- leste2sul1+diff
+    # oeste2norte1 <- sul2oeste1+diff
+    # # print(paste("norte: ", oeste2norte1, " até ", norte2leste1))
+    # # print(paste("leste: ", norte2leste1, " até ", leste2sul1))
+    # # print(paste("sul: ", leste2sul1, " até ", sul2oeste1))
+    # # print(paste("oeste: ", sul2oeste1, " até ", oeste2norte1))
+
+    # # Processa o valor de TRUE_TRACK e seta o ícone
+    # result <- sapply(get_states_df$true_track, function(x) { 
+    #     if ((x >= oeste2norte1 && x <= 360) || (x >= 0 && x < norte2leste1)){
+    #         # print(paste(x," é norte!"))
+    #         x <- "norte.png"
+    #     }
+    #     else if (x >= norte2leste1 && x < leste2sul1){
+    #         # print(paste(x," é leste!"))
+    #         x <- "leste.png"
+    #     }
+    #     else if (x >= leste2sul1 && x < sul2oeste1){
+    #         # print(paste(x," é sul!"))
+    #         x <- "sul.png"
+    #     }
+    #     else if (x >= sul2oeste1 && x < oeste2norte1){
+    #         # print(paste(x," é oeste!"))
+    #         x <- "oeste.png"
+    #     }
+    #     else{
+    #         print(paste(x," deu creps!"))
+    #         x <- "oeste.png"
+    #     }
+    # })
+    #===================================================
+
+    #===================================================
+    # Define as coordenadas a cada 45º
+    diff <- 45
+    nordeste1norte2 <- diff/2
+    leste1nordeste2 <- nordeste1norte2+diff
+    sudeste1leste2 <- leste1nordeste2+diff
+    sul1sudeste2 <- sudeste1leste2+diff
+    sudoeste1sul2 <- sul1sudeste2+diff
+    oeste1sudoeste2 <- sudoeste1sul2+diff
+    noroeste1oeste2 <- oeste1sudoeste2+diff
+    norte1noroeste2 <- noroeste1oeste2+diff
+
+    print(paste("norte: ", norte1noroeste2, " até ", nordeste1norte2))
+    print(paste("nordeste: ", nordeste1norte2, " até ", leste1nordeste2))
+    print(paste("leste: ", leste1nordeste2, " até ", sudeste1leste2))
+    print(paste("sudeste: ", sudeste1leste2, " até ", sul1sudeste2))
+    print(paste("sul: ", sul1sudeste2, " até ", sudoeste1sul2))
+    print(paste("sudoeste: ", sudoeste1sul2, " até ", oeste1sudoeste2))
+    print(paste("oeste: ", oeste1sudoeste2, " até ", noroeste1oeste2))
+    print(paste("noroeste: ", noroeste1oeste2, " até ", norte1noroeste2))
+
+    # Processa o valor de TRUE_TRACK e seta o ícone
+    result <- sapply(get_states_df$true_track, function(x) { 
+        if ((x >= norte1noroeste2 && x <= 360) || (x >= 0 && x < nordeste1norte2)){
+            # print(paste(x," é norte!"))
+            x <- "norte.png"
+        }
+        else if (x >= nordeste1norte2 && x < leste1nordeste2){
+            # print(paste(x," é nordeste!"))
+            x <- "nordeste.png"
+        }
+        else if (x >= leste1nordeste2 && x < sudeste1leste2){
+            # print(paste(x," é leste!"))
+            x <- "leste.png"
+        }
+        else if (x >= sudeste1leste2 && x < sul1sudeste2){
+            # print(paste(x," é sudeste!"))
+            x <- "sudeste.png"
+        }
+        else if (x >= sul1sudeste2 && x < sudoeste1sul2){
+            # print(paste(x," é sul!"))
+            x <- "sul.png"
+        }
+        else if (x >= sudoeste1sul2 && x < oeste1sudoeste2){
+            # print(paste(x," é sudoeste!"))
+            x <- "sudoeste.png"
+        }
+        else if (x >= oeste1sudoeste2 && x < noroeste1oeste2){
+            # print(paste(x," é oeste!"))
+            x <- "oeste.png"
+        }
+        else if (x >= noroeste1oeste2 && x < norte1noroeste2){
+            # print(paste(x," é noroeste!"))
+            x <- "noroeste.png"
+        }
+        else{
+            print(paste(x," deu creps!"))
+            x <- "oeste.png"
+        }
+    })
+    #===================================================
+
+    # Seta os ícones com o resultado do processamento
+    get_states_df$icon <- result
+    
+    # print("")
+    # print("STATES depois: ")
+    # print(get_states_df[1:500,]$icon)
     # ------------------------ END GET ------------------------
+    return (get_states_df)
 }
 
 ## SERVER ##
 server <- function(input, output, session) {
+    shipIcon <- makeAwesomeIcon(icon = "samuicon",
+                            iconRotate = 60,
+                            squareMarker = TRUE,
+                            markerColor = "black")
+
     output$map <- renderLeaflet({
-        # Faz uma atualização dos dados de voos atuais
+        csv_data <- read.csv("../states.csv")
+
+        # # Faz uma atualização dos dados de voos atuais
         current_status <<- get_current_status()
 
-        # first_lat = csv_data[1,]$LATITUDE
-        # first_lng = csv_data[1,]$LONGITUDE
+        # first_lat = current_status[1,]$LATITUDE
+        # first_lng = current_status[1,]$LONGITUDE
        
         leaflet()%>%
         addTiles() %>%
@@ -88,16 +194,29 @@ server <- function(input, output, session) {
         #             ),
         #             popup = "caiosamu"
         # ) %>%
+        
+        # samu = makeIcon("samuicon.png"),
 
         # # Adiciona marcadores através de pontos obtidos do GET
+        # x <- "airplane.png"
+        # x <- "http://www.iconarchive.com/download/i91814/icons8/windows-8/Transport-Airplane-Mode-On.ico"
+        
+        # shipIcon <- makeIcon("airplane.png", iconRotate = 90)
+        
+        # addAwesomeMarkers( data = current_status,
+        # addAwesomeMarkers( data = csv_data,
         addMarkers( data = current_status,
                     lng = ~LONGITUDE, 
-                    lat = ~LATITUDE, 
-                    icon = list(
-                        iconUrl = 'http://www.iconarchive.com/download/i91814/icons8/windows-8/Transport-Airplane-Mode-On.ico',
-                        iconSize = c(20, 20)
-                    ),
-        ) 
+                    lat = ~LATITUDE,
+                    # icon = list(
+                        # iconUrl = "http://www.iconarchive.com/download/i91814/icons8/windows-8/Transport-Airplane-Mode-On.ico",
+                        # iconSize = c(20, 20)
+                    # ),
+                    icon = makeIcon(~icon, iconWidth = 15, iconHeight = 15,),
+                    # icon = JS(paste('L.icon({ iconUrl:', x, ', iconSize: [40, 40] })'))
+                    # icon = makeIcon("", iconWidth = 24, iconHeight = 24)
+                    # options = markerOptions(rotationAngle = c(90))
+        )
     })
 
     observeEvent(input$map_marker_click, {
