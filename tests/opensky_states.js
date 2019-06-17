@@ -80,7 +80,7 @@ var get_response = function (error, response, body){
         console.log(AllStates)
 
         const csvWriter = createCsvWriter({
-            path: "./states.csv",
+            path: "../states.csv",
             header: [
                 {id: 'icao24', title: 'icao24'},
                 {id: 'callsign', title: 'callsign'},

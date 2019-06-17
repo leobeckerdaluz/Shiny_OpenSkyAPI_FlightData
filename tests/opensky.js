@@ -85,7 +85,7 @@ var get_response2 = function (error, response, body){
         filename = cont_ICAO.toString() + "_" + actual_path.icao24
 
         const csvWriter = createCsvWriter({
-            path: "./voo.csv",
+            path: "../voo.csv",
             header: [
                 {id: 'time', title: 'TIMESTAMP'},
                 {id: 'lat', title: 'LATITUDE'},
