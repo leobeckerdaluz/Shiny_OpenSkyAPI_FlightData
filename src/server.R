@@ -11,6 +11,7 @@ require("jsonlite")
 if (!require('DT')) install.packages('DT')
 library(DT)
 
+
 # Método que obtém os dados atuais de voo a 
 # ... partir de uma requisição via API
 get_current_status <- function() {
@@ -48,47 +49,6 @@ get_current_status <- function() {
 
     # Cria a coluna de ícones com valor teste
     get_states_df$icon <- "testeICON"
-
-    # print("")
-    # print("STATES antes: ")
-    # print(get_states_df[1:5,])
-
-    #===================================================
-    # # Define as coordenadas a cada 90º
-    # diff <- 90
-    # norte2leste1 <- diff/2 
-    # leste2sul1 <- norte2leste1+diff
-    # sul2oeste1 <- leste2sul1+diff
-    # oeste2norte1 <- sul2oeste1+diff
-    # # print(paste("norte: ", oeste2norte1, " até ", norte2leste1))
-    # # print(paste("leste: ", norte2leste1, " até ", leste2sul1))
-    # # print(paste("sul: ", leste2sul1, " até ", sul2oeste1))
-    # # print(paste("oeste: ", sul2oeste1, " até ", oeste2norte1))
-
-    # # Processa o valor de TRUE_TRACK e seta o ícone
-    # result <- sapply(get_states_df$true_track, function(x) { 
-    #     if ((x >= oeste2norte1 && x <= 360) || (x >= 0 && x < norte2leste1)){
-    #         # print(paste(x," é norte!"))
-    #         x <- "norte.png"
-    #     }
-    #     else if (x >= norte2leste1 && x < leste2sul1){
-    #         # print(paste(x," é leste!"))
-    #         x <- "leste.png"
-    #     }
-    #     else if (x >= leste2sul1 && x < sul2oeste1){
-    #         # print(paste(x," é sul!"))
-    #         x <- "sul.png"
-    #     }
-    #     else if (x >= sul2oeste1 && x < oeste2norte1){
-    #         # print(paste(x," é oeste!"))
-    #         x <- "oeste.png"
-    #     }
-    #     else{
-    #         print(paste(x," deu creps!"))
-    #         x <- "oeste.png"
-    #     }
-    # })
-    #===================================================
 
     #===================================================
     # Define as coordenadas a cada 45º
@@ -156,42 +116,47 @@ get_current_status <- function() {
     # Seta os ícones com o resultado do processamento
     get_states_df$icon <- result
     
-    # print("")
-    # print("STATES depois: ")
-    # print(get_states_df[1:500,]$icon)
     # ------------------------ END GET ------------------------
     return (get_states_df)
 }
+
+# Faz uma atualização dos dados de voos atuais
+current_status <<- get_current_status()
+
+# seta a palette de cores dos marcadores de rota
+pal <- colorNumeric(palette = c("green", "yellow", "red"), domain = c(600:12000))
+# Lê o csv estático de rota de um voo, já que a API tá 404
+csv_data <- read.csv("../voo.csv")
 
 ## SERVER ##
 server <- function(input, output, session) {
     # Output do mapa
     output$map <- renderLeaflet({
-        # Monta a mensagem de loading
-        now_datetime <- substr(Sys.time(), 1, 16)
-        year <- substr(now_datetime, 1, 4)
-        month <- substr(now_datetime, 6, 7)
-        day <- substr(now_datetime, 9, 10)
-        # date <- substr(now_datetime, 1, 10)
-        date <- paste(sep="", day,"/",month,"/",year)
-        time <- substr(now_datetime, 12, 16)
-        message = paste("Buscando por voos atuais!\nDia ", date, ", às ", time, " !", sep="")
-        showModal(modalDialog(message, footer=NULL))
-        
-        # Faz uma atualização dos dados de voos atuais
-        current_status <<- get_current_status()
-
-        # Remove o modal
-        removeModal()
-
-        # seta a palette
-        pal <- colorNumeric(palette = c("green", "yellow", "red"), domain = c(600:12000))
-
-        csv_data <- read.csv("../voo.csv")
-       
+        # # Monta a mensagem de loading
+        # now_datetime <- substr(Sys.time(), 1, 16)
+        # year <- substr(now_datetime, 1, 4)
+        # month <- substr(now_datetime, 6, 7)
+        # day <- substr(now_datetime, 9, 10)
+        # # date <- substr(now_datetime, 1, 10)
+        # date <- paste(sep="", day,"/",month,"/",year)
+        # time <- substr(now_datetime, 12, 16)
+        # message = paste("Buscando por voos atuais!\nDia ", date, ", às ", time, " !", sep="")
+        # showModal(modalDialog(message, footer=NULL))
+        ### BUSCA PELOS VOOS ATUAIS
+        ### BUSCA PELOS VOOS ATUAIS
+        ### BUSCA PELOS VOOS ATUAIS
+        ### BUSCA PELOS VOOS ATUAIS
+        # # Remove o modal
+        # removeModal()
 
         # MAPA
-        leaflet()%>%
+        leaflet(options = leafletOptions(preferCanvas = TRUE)) %>%
+        # leaflet(options = leafletOptions(preferCanvas = TRUE))%>%
+        # addProviderTiles()%>%
+        # addProviderTiles(providers$Esri.WorldGrayCanvas, options = providerTileOptions(
+        #     updateWhenZooming = FALSE,      # map won't update tiles until zoom is done
+        #     updateWhenIdle = TRUE         # map won't load new tiles when panning
+        # ) %>%
         addTiles() %>%
         setView(lng=-52.24, 
                 lat=-28.15, 
@@ -271,11 +236,6 @@ server <- function(input, output, session) {
         flight_spi <- flight$spi
         flight_position_source <- flight$position_source
         
-        print("")
-        print(paste("ICAO24: ", flight_icao24))
-        print(paste("Latitude: ", flight_lat))
-        print(paste("Longitude: ", flight_lng))
-
         content <- paste(sep = "",
             "<b>ICAO24: ",flight_icao24,"</b><br/>",
             "<b>LAT</b>: ", flight_lat,"º<br/>",
@@ -299,7 +259,7 @@ server <- function(input, output, session) {
                     options = popupOptions(closeButton = TRUE))
 
         
-        # -------------------------- GET FLIGHT --------------------------
+        # ------------------------ GET FLIGHT ROUTE -----------------------
         # source("credentials.R")
         # # print(api_user)
         # # url1 <- paste("https://",api_user,":",api_password,"@opensky-network.org/api/tracks/all?icao24=", teste, "&time=0", sep = "")

@@ -7,13 +7,12 @@ library(DT)
 
 ## UI ##
 ui <- fluidPage(
-    titlePanel("Voos!"),
+    titlePanel("Flights"),
 
     mainPanel(
         tabsetPanel(
-            tabPanel("Mapa", leafletOutput('map')),
+            tabPanel("Mapa", leafletOutput('map', height=480, width=1250)),
             tabPanel("Tabela", DTOutput("tb1"))
         )
     )
 )
-
