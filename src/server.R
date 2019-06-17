@@ -8,7 +8,11 @@ if (!require('httr')) install.packages('httr')
 require("httr")
 if (!require('jsonlite')) install.packages('jsonlite')
 require("jsonlite")
+if (!require('DT')) install.packages('DT')
+library(DT)
 
+# Método que obtém os dados atuais de voo a 
+# ... partir de uma requisição via API
 get_current_status <- function() {
     # -------------------------- GET --------------------------
     print(" ")
@@ -32,11 +36,15 @@ get_current_status <- function() {
     ### get_states_df <- get_states_df[complete.cases(get_states_df[ , 6:7]),]
     get_states_df = get_states_df[!is.na(get_states_df$LONGITUDE),]
     get_states_df = get_states_df[!is.na(get_states_df$true_track),]
+    get_states_df = get_states_df[!is.na(get_states_df$time_position),]
+    get_states_df = get_states_df[!is.na(get_states_df$last_contact),]
     # Converte as colunas e Longitude e Latitude de factor pra numérico com o sub por ser decimal
     get_states_df <- transform(get_states_df, 
                     LONGITUDE = as.numeric(as.character(sub("," , ".", get_states_df$LONGITUDE))), 
                     LATITUDE = as.numeric(as.character(sub("," , ".", get_states_df$LATITUDE))),
-                    true_track = as.numeric(as.character(sub("," , ".", get_states_df$true_track))))
+                    true_track = as.numeric(as.character(sub("," , ".", get_states_df$true_track))),
+                    time_position = as.numeric(as.character(sub("," , ".", get_states_df$time_position))),
+                    last_contact = as.numeric(as.character(sub("," , ".", get_states_df$last_contact))))
 
     # Cria a coluna de ícones com valor teste
     get_states_df$icon <- "testeICON"
@@ -157,85 +165,80 @@ get_current_status <- function() {
 
 ## SERVER ##
 server <- function(input, output, session) {
-    shipIcon <- makeAwesomeIcon(icon = "samuicon",
-                            iconRotate = 60,
-                            squareMarker = TRUE,
-                            markerColor = "black")
-
+    # Output do mapa
     output$map <- renderLeaflet({
-        csv_data <- read.csv("../states.csv")
-
-        # # Faz uma atualização dos dados de voos atuais
+        # Monta a mensagem de loading
+        now_datetime <- substr(Sys.time(), 1, 16)
+        year <- substr(now_datetime, 1, 4)
+        month <- substr(now_datetime, 6, 7)
+        day <- substr(now_datetime, 9, 10)
+        # date <- substr(now_datetime, 1, 10)
+        date <- paste(sep="", day,"/",month,"/",year)
+        time <- substr(now_datetime, 12, 16)
+        message = paste("Buscando por voos atuais!\nDia ", date, ", às ", time, " !", sep="")
+        showModal(modalDialog(message, footer=NULL))
+        
+        # Faz uma atualização dos dados de voos atuais
         current_status <<- get_current_status()
 
-        # first_lat = current_status[1,]$LATITUDE
-        # first_lng = current_status[1,]$LONGITUDE
+        # Remove o modal
+        removeModal()
+
+        # seta a palette
+        pal <- colorNumeric(palette = c("green", "yellow", "red"), domain = c(600:12000))
+
+        csv_data <- read.csv("../voo.csv")
        
+
+        # MAPA
         leaflet()%>%
         addTiles() %>%
-        # setView(lng=first_lng, 
-                # lat=first_lat, 
-                # zoom=6
-        # ) %>%
+        setView(lng=-52.24, 
+                lat=-28.15, 
+                zoom=6
+        ) %>%
         
+        # # Adiciona marcadores de rota
         # addPolylines(data = csv_data, 
         #              lng = ~LONGITUDE, 
         #              lat = ~LATITUDE, 
         #              color = "green") %>%
-        
-        # addMarkers(data = csv_data, 
-        #             lng = ~LONGITUDE, 
-        #             lat = ~LATITUDE, 
-        #             group = ~TIMESTAMP)
-        
-        # addMarkers( data = csv_data[1,], 
-        #             icon = list(
-        #               iconUrl = 'http://www.iconarchive.com/download/i91814/icons8/windows-8/Transport-Airplane-Mode-On.ico',
-        #               iconSize = c(20, 20)
-        #             ),
-        #             popup = "caiosamu"
-        # ) %>%
-        
-        # samu = makeIcon("samuicon.png"),
+        addCircleMarkers(   data = csv_data, 
+                            lng = ~LONGITUDE, 
+                            lat = ~LATITUDE, 
+                            radius = 3,
+                            color = ~pal(COLOR),
+                            layerId = ~COLOR
+        ) %>%
 
-        # # Adiciona marcadores através de pontos obtidos do GET
-        # x <- "airplane.png"
-        # x <- "http://www.iconarchive.com/download/i91814/icons8/windows-8/Transport-Airplane-Mode-On.ico"
-        
-        # shipIcon <- makeIcon("airplane.png", iconRotate = 90)
-        
-        # addAwesomeMarkers( data = current_status,
-        # addAwesomeMarkers( data = csv_data,
-        addMarkers( data = current_status,
+        # # Adiciona marcadores através de pontos obtidos
+        addMarkers( data = current_status,   ###addAwesomeMarkers
                     lng = ~LONGITUDE, 
                     lat = ~LATITUDE,
                     # icon = list(
                         # iconUrl = "http://www.iconarchive.com/download/i91814/icons8/windows-8/Transport-Airplane-Mode-On.ico",
                         # iconSize = c(20, 20)
                     # ),
-                    icon = makeIcon(~icon, iconWidth = 15, iconHeight = 15,),
-                    # icon = JS(paste('L.icon({ iconUrl:', x, ', iconSize: [40, 40] })'))
-                    # icon = makeIcon("", iconWidth = 24, iconHeight = 24)
-                    # options = markerOptions(rotationAngle = c(90))
+                    icon = makeIcon(~icon, 
+                                    iconWidth = 15, 
+                                    iconHeight = 15,
+                    ),
         )
     })
 
+     # Output da Tabela
+    output$tb1 <- renderDT({
+        # csv_data <- read.csv("../states.csv")
+        
+        datatable(  current_status, 
+                    options = list(pageLenght = 5)
+        )
+    })
+
+    # Evento de clique em um voo
     observeEvent(input$map_marker_click, {
-        # click = input$map_click
         click <- input$map_marker_click
         
-        # print(click)
-
-        # Obtém o data frame de voos atuais
-        # current_status <- get_states_csv()
-        # Printa alguns valores para análise
-        print(paste("latitude df[1,]: ", current_status[1,]$LATITUDE))
-        print(paste("latitude df[1,] class: ", class(current_status[1,]$LATITUDE)))
-        print(paste("latitude event: ", click$lat))
-        print(paste("latitude event class: ", class(click$lat)))
-        print(paste("longitude event: ", click$lng))
-        print(paste("longitude event class: ", class(click$lng)))
-
         # busca qual o index onde está a latitude e longitude
         index <- which(current_status$LATITUDE == click$lat)
         print(paste("INDEX:", index, sep=""))
@@ -253,8 +256,10 @@ server <- function(input, output, session) {
         flight_lng <- flight$LONGITUDE
         flight_callsign <- flight$callsign
         flight_origin_country <- flight$origin_country
-        flight_time_position <- flight$time_position
-        flight_last_contact <- flight$last_contact
+        flight_time_position <- as.POSIXct(flight$time_position, origin="1970-01-01")
+        flight_time_position <- substr(flight_time_position, 1, 16)
+        flight_last_contact <- as.POSIXct(flight$last_contact, origin="1970-01-01")
+        flight_last_contact <- substr(flight_last_contact, 1, 16)
         flight_altitude <- flight$altitude
         flight_on_ground <- flight$on_ground
         flight_velocity <- flight$velocity
@@ -273,20 +278,20 @@ server <- function(input, output, session) {
 
         content <- paste(sep = "",
             "<b>ICAO24: ",flight_icao24,"</b><br/>",
-            "<b>LAT</b>: ", flight_lat,"<br/>",
-            "<b>LONG</b>: ", flight_lng,"<br/>",
+            "<b>LAT</b>: ", flight_lat,"º<br/>",
+            "<b>LONG</b>: ", flight_lng,"º<br/>",
             "<b>CALLSIGN</b>: ", flight_callsign,"<br/>",
-            "<b>ALTITUDE</b>: ", flight_altitude,"<br/>",
+            "<b>ALTITUDE</b>: ", flight_altitude,"m<br/>",
             "<b>ON GROUND</b>: ", flight_on_ground,"<br/>",
-            "<b>VELOCITY</b>: ", flight_velocity,"<br/>",
-            "<b>TRUE TRACK</b>: ", flight_true_track,"<br/>",
-            "<b>VERTICAL RATE</b>: ", flight_vertical_rate,"<br/>",
+            "<b>VELOCITY</b>: ", flight_velocity,"m/s<br/>",
+            "<b>TRUE TRACK</b>: ", flight_true_track,"º<br/>",
+            "<b>VERTICAL RATE</b>: ", flight_vertical_rate,"m/s<br/>",
             "<b>ORIGIN COUNTRY</b>: ", flight_origin_country,"<br/>",
             "<b>TIME POSITION</b>: ", flight_time_position,"<br/>",
-            "<b>LAST CONTACT</b>: ", flight_last_contact,"<br/>",
-            "<b>AEE CARALHO!</b>"
+            "<b>LAST CONTACT</b>: ", flight_last_contact,"<br/>"
         )
 
+        # Adiciona o popup no mapa
         leafletProxy('map') %>%
         addPopups(  lng=click$lng, 
                     lat=click$lat, 
@@ -294,7 +299,7 @@ server <- function(input, output, session) {
                     options = popupOptions(closeButton = TRUE))
 
         
-         # -------------------------- GET FLIGHT --------------------------
+        # -------------------------- GET FLIGHT --------------------------
         # source("credentials.R")
         # # print(api_user)
         # # url1 <- paste("https://",api_user,":",api_password,"@opensky-network.org/api/tracks/all?icao24=", teste, "&time=0", sep = "")
@@ -304,26 +309,18 @@ server <- function(input, output, session) {
         # get_prices_json <- fromJSON(get_prices_text, flatten = TRUE)
         # get_prices_df <- as.data.frame(get_prices_json)
         # path_df <- as.data.frame(get_prices_json$path)
-        # names(path_df) <- c("TIMESTAMP", "LATITUDE", "LONGITUDE", "COLOR", "ANGLE", "on_ground")
-        # ------------------------ END GET -------------------------------
-
+        # names(path_df) <- c("TIMESTAMP", "LATITUDE", "LONGITUDE", "altitude", "ANGLE", "on_ground")
 
         # pal <- colorNumeric(palette = c("green", "yellow", "red"), domain = c(600:12000))
 
         # # Adiciona marcadores da trajetória do voo
-        # addCircleMarkers(   data = path_df, 
-        #                     lng = ~LONGITUDE, 
-        #                     lat = ~LATITUDE, 
-        #                     radius = 3,
-        #                     color = ~pal(COLOR),
-        #                     layerId = ~COLOR
+            # addCircleMarkers(   data = path_df, 
+            #                     lng = ~LONGITUDE, 
+            #                     lat = ~LATITUDE, 
+            #                     radius = 3,
+            #                     color = ~pal(altitude),
+            #                     layerId = ~altitude
         # )
-
-
-        # addPopups(-122.327298, 47.597131, content,
-        # )
-
-        # addMarkers( lng = click$lng, 
-                    # lat = click$lat)
+        # ------------------------ END GET -------------------------------
     })
 }

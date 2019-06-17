@@ -26,31 +26,49 @@ var get_response = function (error, response, body){
         for (s in body.states){
             var actual = body.states[s]
 
-            var icao = actual[0]
-            var long = actual[5]
-            var lat = actual[6]
+            var icao24 = actual[0]
+            var callsign = actual[1]
+            var origin_country = actual[2]
+            var time_position = actual[3]
+            var last_contact = actual[4]
+            var longitude = actual[5]
+            var latitude = actual[6]
+            var baro_altitude = actual[7]
+            var on_ground = actual[8]
+            var velocity = actual[9]
+            var true_track = actual[10]
+            var vertical_rate = actual[11]
+            var sensors = actual[12]
+            var geo_altitude = actual[12]
+            var squawk = actual[13]
+            var spi = actual[14]
+            var position_source = actual[15]
 
-            if (long && lat){
-                // console.log("Deu!!")
-                // console.log("Lat: " + lat)
-                // console.log("Long: " + long)
-                // console.log("-----------------")
-                
-                var position = {icao24: icao, latitude: lat, longitude: long}
-                AllStates.push(position)
-            }
+            // console.log("Deu!!")
+            // console.log("Lat: " + lat)
+            // console.log("Long: " + long)
+            // console.log("-----------------")
+            
+            var position = {icao24: icao24, 
+                            callsign: callsign,
+                            origin_country: origin_country,
+                            time_position: time_position,
+                            last_contact: last_contact,
+                            longitude: longitude,
+                            latitude: latitude,
+                            baro_altitude: baro_altitude,
+                            on_ground: on_ground,
+                            velocity: velocity,
+                            true_track: true_track,
+                            vertical_rate: vertical_rate,
+                            sensors: sensors,
+                            geo_altitude: geo_altitude,
+                            squawk: squawk,
+                            spi: spi,
+                            position_source: position_source}
 
-            // icao24
-            // callsign
-            // origin_country
-            // time_position
-            // last_contact
-            // longitude
-            // latitude
-            // baro_altitude
-            // on_ground
-            // velocity
-            // true_track
+            AllStates.push(position)
+
             // vertical_rate
             // sensors
             // geo_altitude
@@ -64,9 +82,23 @@ var get_response = function (error, response, body){
         const csvWriter = createCsvWriter({
             path: "./states.csv",
             header: [
-                {id: 'icao24', title: 'ICAO24'},
-                {id: 'latitude', title: 'LATITUDE'},
-                {id: 'longitude', title: 'LONGITUDE'}
+                {id: 'icao24', title: 'icao24'},
+                {id: 'callsign', title: 'callsign'},
+                {id: 'origin_country', title: 'origin_country'},
+                {id: 'time_position', title: 'time_position'},
+                {id: 'last_contact', title: 'last_contact'},
+                {id: 'longitude', title: 'longitude'},
+                {id: 'latitude', title: 'latitude'},
+                {id: 'baro_altitude', title: 'baro_altitude'},
+                {id: 'on_ground', title: 'on_ground'},
+                {id: 'velocity', title: 'velocity'},
+                {id: 'true_track', title: 'true_track'},
+                {id: 'vertical_rate', title: 'vertical_rate'},
+                {id: 'sensors', title: 'sensors'},
+                {id: 'geo_altitude', title: 'geo_altitude'},
+                {id: 'squawk', title: 'squawk'},
+                {id: 'spi', title: 'spi'},
+                {id: 'position_source', title: 'position_source'},
             ]
         });
 
@@ -79,7 +111,6 @@ var get_response = function (error, response, body){
         
     }
 }   
-
 
 console.log("--------------------------------------------------------------------------------------------------")
 console.log("Consultando todos os estados atuais!\n")
